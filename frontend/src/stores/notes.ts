@@ -14,8 +14,8 @@ export const useNotesStore = defineStore('notes', () => {
   const queryParams = ref<NotesQueryParams>({
     page: 1,
     limit: 10,
-    sort_by: 'created_at',
-    sort_order: 'desc'
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
   })
 
   // Getters

@@ -16,7 +16,7 @@ export function useNotes() {
       const queryParams = { ...notesStore.queryParams, ...params }
       const response = await notesService.getNotes(queryParams)
       notesStore.setNotes(response.data)
-      notesStore.setPagination(response.total, response.page, response.total_pages)
+      notesStore.setPagination(response.total, response.page, response.totalPages)
       notesStore.setQueryParams(queryParams)
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Failed to fetch notes'
@@ -92,8 +92,8 @@ export function useNotes() {
     notesStore.setQueryParams({ search, page: 1 })
   }
 
-  const setSorting = (sortBy: 'created_at' | 'updated_at' | 'title', sortOrder: 'asc' | 'desc') => {
-    notesStore.setQueryParams({ sort_by: sortBy, sort_order: sortOrder, page: 1 })
+  const setSorting = (sortBy: 'createdAt' | 'updatedAt' | 'title', sortOrder: 'asc' | 'desc') => {
+    notesStore.setQueryParams({ sortBy, sortOrder, page: 1 })
   }
 
   const setPage = (page: number) => {

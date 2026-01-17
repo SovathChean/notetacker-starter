@@ -59,9 +59,9 @@ const truncateContent = (content: string, maxLength: number = 150) => {
     </p>
 
     <div class="text-xs text-gray-400">
-      <span>Created: {{ formatDate(props.note.created_at) }}</span>
-      <span v-if="props.note.updated_at !== props.note.created_at" class="ml-4">
-        Updated: {{ formatDate(props.note.updated_at) }}
+      <span>Created: {{ formatDate(props.note.createdAt) }}</span>
+      <span v-if="props.note.updatedAt !== props.note.createdAt" class="ml-4">
+        Updated: {{ formatDate(props.note.updatedAt) }}
       </span>
     </div>
   </div>

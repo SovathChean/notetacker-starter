@@ -23,8 +23,8 @@ const isDeleting = ref(false)
 
 // Filter state
 const search = ref(queryParams.value.search || '')
-const sortBy = ref(queryParams.value.sort_by || 'created_at')
-const sortOrder = ref(queryParams.value.sort_order || 'desc')
+const sortBy = ref(queryParams.value.sortBy || 'createdAt')
+const sortOrder = ref(queryParams.value.sortOrder || 'desc')
 
 // Computed
 const hasNotes = computed(() => notes.value.length > 0)
@@ -96,8 +96,8 @@ const handleDeleteNote = async () => {
 const handleSearch = () => {
   fetchNotes({
     search: search.value,
-    sort_by: sortBy.value as 'created_at' | 'updated_at' | 'title',
-    sort_order: sortOrder.value as 'asc' | 'desc',
+    sortBy: sortBy.value as 'createdAt' | 'updatedAt' | 'title',
+    sortOrder: sortOrder.value as 'asc' | 'desc',
     page: 1
   })
 }

@@ -5,8 +5,8 @@ import type { User, AuthResponse } from '@/types'
 export const useAuthStore = defineStore('auth', () => {
   // State
   const user = ref<User | null>(null)
-  const accessToken = ref<string | null>(localStorage.getItem('access_token'))
-  const refreshToken = ref<string | null>(localStorage.getItem('refresh_token'))
+  const accessToken = ref<string | null>(localStorage.getItem('accessToken'))
+  const refreshToken = ref<string | null>(localStorage.getItem('refreshToken'))
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -15,19 +15,19 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Actions
   function setTokens(auth: AuthResponse) {
-    accessToken.value = auth.access_token
-    refreshToken.value = auth.refresh_token
+    accessToken.value = auth.accessToken
+    refreshToken.value = auth.refreshToken
     user.value = auth.user
-    localStorage.setItem('access_token', auth.access_token)
-    localStorage.setItem('refresh_token', auth.refresh_token)
+    localStorage.setItem('accessToken', auth.accessToken)
+    localStorage.setItem('refreshToken', auth.refreshToken)
   }
 
   function clearTokens() {
     accessToken.value = null
     refreshToken.value = null
     user.value = null
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
   }
 
   function setError(message: string | null) {

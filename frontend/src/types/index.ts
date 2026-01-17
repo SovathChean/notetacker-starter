@@ -3,18 +3,18 @@ export interface User {
   id: string
   email: string
   username: string
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 // Note types
 export interface Note {
   id: string
-  user_id: string
+  userId: string
   title: string
   content: string
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CreateNoteRequest {
@@ -40,15 +40,15 @@ export interface RegisterRequest {
 }
 
 export interface AuthResponse {
-  access_token: string
-  refresh_token: string
-  token_type: string
-  expires_in: number
+  accessToken: string
+  refreshToken: string
+  tokenType: string
+  expiresIn: number
   user: User
 }
 
 export interface RefreshTokenRequest {
-  refresh_token: string
+  refreshToken: string
 }
 
 // API Response types
@@ -67,7 +67,7 @@ export interface PaginatedResponse<T> {
   total: number
   page: number
   limit: number
-  total_pages: number
+  totalPages: number
 }
 
 // Query params
@@ -75,6 +75,6 @@ export interface NotesQueryParams {
   page?: number
   limit?: number
   search?: string
-  sort_by?: 'created_at' | 'updated_at' | 'title'
-  sort_order?: 'asc' | 'desc'
+  sortBy?: 'createdAt' | 'updatedAt' | 'title'
+  sortOrder?: 'asc' | 'desc'
 }

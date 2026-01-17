@@ -9,7 +9,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   search: '',
-  sortBy: 'created_at',
+  sortBy: 'createdAt',
   sortOrder: 'desc'
 })
 
@@ -82,8 +82,8 @@ const handleKeypress = (event: KeyboardEvent) => {
         @change="handleSortChange"
         class="input w-auto"
       >
-        <option value="created_at">Created Date</option>
-        <option value="updated_at">Updated Date</option>
+        <option value="createdAt">Created Date</option>
+        <option value="updatedAt">Updated Date</option>
         <option value="title">Title</option>
       </select>
 
