@@ -56,12 +56,21 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:80",
+                "http://localhost",
+                "http://frontend:80",
+                "http://frontend"
+              )
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
     });
 });
+
+// Add Health Checks
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -72,10 +81,19 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Only use HTTPS redirection in development
+if (!app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Map health check endpoint
+app.MapHealthChecks("/api/health");
+
 app.MapControllers();
 
 app.Run();
