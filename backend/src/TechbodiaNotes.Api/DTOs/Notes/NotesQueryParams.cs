@@ -13,15 +13,27 @@ public class NotesQueryParams
     [MaxLength(200, ErrorMessage = "Search query must be at most 200 characters")]
     public string? Search { get; set; }
 
-    public string SortBy { get; set; } = "created_at";
+    public string SortBy { get; set; } = "createdAt";
 
     public string SortOrder { get; set; } = "desc";
 
-    // Validate sort options
+    // Validate sort options (accept both camelCase and snake_case)
     public bool IsValidSortBy()
     {
-        var validOptions = new[] { "created_at", "updated_at", "title" };
+        var validOptions = new[] { "created_at", "updated_at", "title", "createdAt", "updatedAt", "createdat", "updatedat" };
         return validOptions.Contains(SortBy.ToLower());
+    }
+
+    // Normalize sort field to snake_case for database queries
+    public string GetNormalizedSortBy()
+    {
+        return SortBy.ToLower() switch
+        {
+            "createdat" or "created_at" => "created_at",
+            "updatedat" or "updated_at" => "updated_at",
+            "title" => "title",
+            _ => "created_at"
+        };
     }
 
     public bool IsValidSortOrder()

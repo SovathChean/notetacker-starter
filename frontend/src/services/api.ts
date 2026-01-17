@@ -40,7 +40,7 @@ api.interceptors.response.use(
       if (refreshToken) {
         try {
           const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken
+            RefreshToken: refreshToken
           })
 
           const { accessToken, refreshToken: newRefreshToken } = response.data

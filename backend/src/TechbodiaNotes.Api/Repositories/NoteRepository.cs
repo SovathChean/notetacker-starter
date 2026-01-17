@@ -45,11 +45,12 @@ public class NoteRepository : INoteRepository
             parameters.Add("Search", $"%{queryParams.Search}%");
         }
 
-        // Build ORDER BY clause
+        // Build ORDER BY clause (accept both camelCase and snake_case)
         var orderColumn = queryParams.SortBy.ToLower() switch
         {
             "title" => "Title",
-            "updated_at" => "UpdatedAt",
+            "updated_at" or "updatedat" => "UpdatedAt",
+            "created_at" or "createdat" => "CreatedAt",
             _ => "CreatedAt"
         };
         var orderDirection = queryParams.SortOrder.ToLower() == "asc" ? "ASC" : "DESC";

@@ -33,12 +33,12 @@ public class NotesController : ControllerBase
         // Validate query params
         if (!queryParams.IsValidSortBy())
         {
-            return BadRequest(ErrorResponse.Create("Invalid sort_by parameter. Valid values: created_at, updated_at, title"));
+            return BadRequest(ErrorResponse.Create("Invalid sortBy parameter. Valid values: createdAt, updatedAt, title"));
         }
 
         if (!queryParams.IsValidSortOrder())
         {
-            return BadRequest(ErrorResponse.Create("Invalid sort_order parameter. Valid values: asc, desc"));
+            return BadRequest(ErrorResponse.Create("Invalid sortOrder parameter. Valid values: asc, desc"));
         }
 
         var notes = await _noteService.GetNotesAsync(userId.Value, queryParams);
