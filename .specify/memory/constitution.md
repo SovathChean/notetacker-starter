@@ -1,50 +1,147 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+SYNC IMPACT REPORT
+==================
+Version change: (new) → 1.0.0
+Modified principles: N/A (initial constitution)
+Added sections:
+  - Core Principles (5 principles)
+  - Technical Standards
+  - Development Workflow
+  - Governance
+Removed sections: N/A
+Templates requiring updates:
+  - ✅ .specify/templates/plan-template.md (compatible - uses Constitution Check)
+  - ✅ .specify/templates/spec-template.md (compatible - no conflicts)
+  - ✅ .specify/templates/tasks-template.md (compatible - supports web app structure)
+Follow-up TODOs: None
+-->
+
+# Techbodia Notes Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Data Ownership & Isolation
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All operations MUST enforce user-scoped data access. Users can only create, read, update,
+and delete their own notes.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+- Backend API endpoints MUST validate user ownership before any data operation
+- Database queries MUST include user context filtering (WHERE UserId = @CurrentUserId)
+- Frontend MUST NOT display or access notes belonging to other users
+- Unauthorized access attempts MUST return 403 Forbidden, not 404 Not Found
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+**Rationale**: Privacy and data integrity are non-negotiable. This principle prevents
+data leakage and ensures compliance with user expectations.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### II. Type Safety First
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+All code MUST leverage strong typing to catch errors at compile time rather than runtime.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- Frontend MUST use TypeScript with strict mode enabled (`"strict": true`)
+- Backend MUST use C# nullable reference types and explicit DTOs
+- API contracts MUST define explicit request/response models (no dynamic or object types)
+- Shared types between frontend and backend MUST be documented in contracts/
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+**Rationale**: Type safety reduces bugs, improves IDE support, and makes refactoring safer.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### III. Clean Architecture
+
+The system MUST maintain clear separation of concerns with independently deployable layers.
+
+- Frontend (Vue + TailwindCSS) and Backend (ASP.NET Core) MUST be separate projects
+- Backend MUST follow layered architecture: Controllers → Services → Repositories
+- Data access MUST use Dapper repositories, not inline SQL in controllers or services
+- Business logic MUST reside in service classes, not in controllers or UI components
+- Each layer MUST depend only on abstractions (interfaces), not implementations
+
+**Rationale**: Clean architecture enables independent testing, deployment, and team scaling.
+
+### IV. Reusable & DRY Code
+
+Code MUST be written for reusability and MUST NOT repeat logic unnecessarily.
+
+- Common utilities MUST be extracted into shared modules/services
+- Frontend components MUST be composable and accept props for customization
+- Backend services MUST be injectable and single-purpose
+- Database queries for common operations MUST be centralized in repository methods
+- Copy-pasted code blocks (>5 lines) MUST be refactored into shared functions
+
+**Rationale**: DRY code reduces maintenance burden and ensures consistent behavior.
+
+### V. Responsive & Accessible UI
+
+All user interfaces MUST be responsive and follow accessibility best practices.
+
+- UI MUST be mobile-first using TailwindCSS responsive utilities
+- All interactive elements MUST be keyboard accessible
+- Form inputs MUST have associated labels and validation feedback
+- Loading and error states MUST be clearly communicated to users
+- State management MUST provide consistent UX across components
+
+**Rationale**: A responsive, accessible UI serves all users regardless of device or ability.
+
+## Technical Standards
+
+This section defines the technology stack and coding standards for the project.
+
+**Frontend Stack**:
+- Vue 3 with Composition API and `<script setup>` syntax
+- TypeScript with strict mode
+- TailwindCSS for styling (utility-first approach)
+- Pinia or Vue's built-in reactivity for state management
+- Axios or Fetch for API communication
+
+**Backend Stack**:
+- C# with ASP.NET Core Web API
+- Dapper for data access (lightweight ORM)
+- SQL Server database
+- Dependency injection for all services
+
+**Code Style**:
+- Frontend: ESLint + Prettier with Vue recommended rules
+- Backend: .NET code style conventions with nullable enabled
+- Meaningful names over comments; self-documenting code preferred
+
+## Development Workflow
+
+This section defines the development process and quality gates.
+
+**Branch Strategy**:
+- Feature branches for all changes (e.g., `feature/###-feature-name`)
+- Main branch protected; requires passing checks before merge
+
+**API-First Development**:
+- Define API contracts before implementation
+- Frontend MAY use mock data while backend is in progress
+- Contract changes MUST be coordinated between frontend and backend
+
+**Quality Gates**:
+- All code MUST pass linting before commit
+- All API endpoints MUST be tested (unit or integration)
+- Breaking changes MUST be documented in PR description
+
+**Authentication** (Optional for junior position):
+- When implemented, MUST use JWT or session-based auth
+- All protected endpoints MUST validate authentication
+- Unauthorized requests MUST return 401, forbidden MUST return 403
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution establishes the guiding principles for the Techbodia Notes project.
+All development decisions, code reviews, and architectural choices MUST align with
+these principles.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Amendment Process**:
+1. Propose changes via pull request to this file
+2. Document rationale for principle additions, modifications, or removals
+3. Version bump according to semantic versioning rules
+4. Update dependent templates if principle-driven sections change
+
+**Compliance**:
+- All PRs MUST be reviewed against constitution principles
+- Violations MUST be justified in the Complexity Tracking section of plan.md
+- Constitution Check in plan-template.md MUST be completed before implementation
+
+**Guidance**: Use `/specs/[feature]/plan.md` for feature-specific implementation guidance.
+
+**Version**: 1.0.0 | **Ratified**: 2026-01-17 | **Last Amended**: 2026-01-17
