@@ -20,28 +20,7 @@ services:
     networks:
       - techbodia-network
 
-  # Database Initialization
-  db-init:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: techbodia-notes-db-init
-    depends_on:
-      database:
-        condition: service_healthy
-    volumes:
-      - ./database/migrations:/migrations:ro
-      - ./database/docker-init.sql:/docker-init.sql:ro
-    entrypoint: >
-      /bin/bash -c "
-        echo 'Waiting for SQL Server to be ready...';
-        sleep 5;
-        echo 'Running database initialization...';
-        /opt/mssql-tools18/bin/sqlcmd -S database -U sa -P 'YourStrong@Passw0rd' -C -i /docker-init.sql;
-        echo 'Database initialization complete!';
-      "
-    networks:
-      - techbodia-network
-
-  # Backend API
+  # Backend API (EF Core migrations run automatically on startup)
   backend:
     build:
       context: ./backend
@@ -58,8 +37,8 @@ services:
     ports:
       - "5001:5000"
     depends_on:
-      db-init:
-        condition: service_completed_successfully
+      database:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
       interval: 30s

@@ -1,0 +1,15 @@
+# Development overrides - automatically loaded with docker-compose up
+# Hot-reload enabled for frontend development
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+    ports:
+      - "7001:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5001

@@ -76,11 +76,11 @@ const handleKeypress = (event: KeyboardEvent) => {
     </div>
 
     <!-- Sort -->
-    <div class="flex gap-2">
+    <div class="flex gap-3">
       <select
         v-model="localSortBy"
         @change="handleSortChange"
-        class="input w-auto"
+        class="select"
       >
         <option value="createdAt">Created Date</option>
         <option value="updatedAt">Updated Date</option>
@@ -90,7 +90,7 @@ const handleKeypress = (event: KeyboardEvent) => {
       <select
         v-model="localSortOrder"
         @change="handleSortChange"
-        class="input w-auto"
+        class="select"
       >
         <option value="desc">Newest First</option>
         <option value="asc">Oldest First</option>
