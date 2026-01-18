@@ -31,7 +31,7 @@
 - [ ] T004 [P] Configure TailwindCSS in frontend/tailwind.config.js and frontend/src/index.css
 - [ ] T005 [P] Configure TypeScript strict mode in frontend/tsconfig.json
 - [ ] T006 [P] Configure ESLint and Prettier in frontend/.eslintrc.cjs and frontend/.prettierrc
-- [ ] T007 [P] Add .NET dependencies (Dapper, Microsoft.Data.SqlClient, JwtBearer, BCrypt.Net-Next) in backend/src/TechbodiaNotes.Api/TechbodiaNotes.Api.csproj
+- [ ] T007 [P] Add .NET dependencies (Entity Framework Core, Microsoft.Data.SqlClient, JwtBearer, BCrypt.Net-Next) in backend/src/TechbodiaNotes.Api/TechbodiaNotes.Api.csproj
 - [ ] T008 [P] Add frontend dependencies (Vue Router, Pinia, Axios) in frontend/package.json
 
 **Checkpoint**: Project scaffolding complete - ready for foundational infrastructure
@@ -49,7 +49,7 @@
 - [ ] T009 Create SQL migration script in database/migrations/001_create_users_table.sql
 - [ ] T010 [P] Create SQL migration script in database/migrations/002_create_refresh_tokens_table.sql
 - [ ] T011 [P] Create SQL migration script in database/migrations/003_create_notes_table.sql
-- [ ] T012 Create database connection factory in backend/src/TechbodiaNotes.Api/Data/DbConnectionFactory.cs
+- [ ] T012 Create ApplicationDbContext with DbSets in backend/src/TechbodiaNotes.Api/Infrastructure/ApplicationDbContext.cs
 
 ### Domain Models
 
@@ -74,14 +74,14 @@
 ### Auth Repositories
 
 - [ ] T024 Create IUserRepository interface in backend/src/TechbodiaNotes.Api/Repositories/IUserRepository.cs
-- [ ] T025 Implement UserRepository with Dapper in backend/src/TechbodiaNotes.Api/Repositories/UserRepository.cs
+- [ ] T025 Implement UserRepository with EF Core in backend/src/TechbodiaNotes.Api/Repositories/UserRepository.cs
 - [ ] T026 [P] Create IRefreshTokenRepository interface in backend/src/TechbodiaNotes.Api/Repositories/IRefreshTokenRepository.cs
-- [ ] T027 [P] Implement RefreshTokenRepository with Dapper in backend/src/TechbodiaNotes.Api/Repositories/RefreshTokenRepository.cs
+- [ ] T027 [P] Implement RefreshTokenRepository with EF Core in backend/src/TechbodiaNotes.Api/Repositories/RefreshTokenRepository.cs
 
 ### Notes Repositories
 
 - [ ] T028 Create INotesRepository interface in backend/src/TechbodiaNotes.Api/Repositories/INotesRepository.cs
-- [ ] T029 Implement NotesRepository with Dapper in backend/src/TechbodiaNotes.Api/Repositories/NotesRepository.cs
+- [ ] T029 Implement NotesRepository with EF Core in backend/src/TechbodiaNotes.Api/Repositories/NotesRepository.cs
 
 ### Auth Services
 

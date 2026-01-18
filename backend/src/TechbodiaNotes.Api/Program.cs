@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TechbodiaNotes.Api.Infrastructure;
@@ -16,8 +17,11 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Register Infrastructure
-builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
+// Register DbContext with SQL Server
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("DefaultConnection string is not configured");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 // Register Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();

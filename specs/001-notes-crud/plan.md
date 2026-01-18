@@ -7,7 +7,7 @@
 
 Implement a full-stack notes management application with CRUD operations (Create, Read, Update, Delete).
 The frontend uses Vue 3 + TypeScript + TailwindCSS with filtering, sorting, and search capabilities.
-The backend uses C# ASP.NET Core Web API with Dapper ORM connecting to SQL Server.
+The backend uses C# ASP.NET Core Web API with Entity Framework Core connecting to SQL Server.
 Users can only access their own notes (data isolation enforced at API level).
 Authentication is implemented using JWT with OAuth2 pattern (access_token + refresh_token).
 
@@ -19,7 +19,7 @@ Authentication is implemented using JWT with OAuth2 pattern (access_token + refr
 
 **Primary Dependencies**:
 - Frontend: Vue 3, Vue Router, Pinia (state management), Axios, TailwindCSS 3.x
-- Backend: ASP.NET Core 8, Dapper 2.x, Microsoft.Data.SqlClient
+- Backend: ASP.NET Core 8, Entity Framework Core 8.x, Microsoft.Data.SqlClient
 - Authentication: Microsoft.AspNetCore.Authentication.JwtBearer, BCrypt.Net-Next
 
 **Storage**: SQL Server (2019+ or Azure SQL)
@@ -111,8 +111,8 @@ backend/
 │       │       ├── CreateNoteRequest.cs
 │       │       ├── UpdateNoteRequest.cs
 │       │       └── NoteResponse.cs
-│       ├── Data/
-│       │   └── DbConnectionFactory.cs
+│       ├── Infrastructure/
+│       │   └── ApplicationDbContext.cs
 │       ├── Middleware/
 │       │   └── JwtMiddleware.cs
 │       └── Program.cs

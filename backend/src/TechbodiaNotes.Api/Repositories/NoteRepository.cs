@@ -1,4 +1,4 @@
-using Dapper;
+using Microsoft.EntityFrameworkCore;
 using TechbodiaNotes.Api.Infrastructure;
 using TechbodiaNotes.Api.Models;
 using TechbodiaNotes.Api.DTOs.Notes;
@@ -7,117 +7,114 @@ namespace TechbodiaNotes.Api.Repositories;
 
 public class NoteRepository : INoteRepository
 {
-    private readonly IDbConnectionFactory _connectionFactory;
+    private readonly ApplicationDbContext _dbContext;
 
-    public NoteRepository(IDbConnectionFactory connectionFactory)
+    public NoteRepository(ApplicationDbContext dbContext)
     {
-        _connectionFactory = connectionFactory;
+        _dbContext = dbContext;
     }
 
     public async Task<Note?> GetByIdAsync(Guid id)
     {
-        using var connection = _connectionFactory.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<Note>(
-            "SELECT Id, UserId, Title, Content, CreatedAt, UpdatedAt FROM Notes WHERE Id = @Id",
-            new { Id = id });
+        return await _dbContext.Notes
+            .AsNoTracking()
+            .FirstOrDefaultAsync(n => n.Id == id);
     }
 
     public async Task<Note?> GetByIdAndUserIdAsync(Guid id, Guid userId)
     {
-        using var connection = _connectionFactory.CreateConnection();
-        return await connection.QuerySingleOrDefaultAsync<Note>(
-            "SELECT Id, UserId, Title, Content, CreatedAt, UpdatedAt FROM Notes WHERE Id = @Id AND UserId = @UserId",
-            new { Id = id, UserId = userId });
+        return await _dbContext.Notes
+            .AsNoTracking()
+            .FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
     }
 
     public async Task<(IEnumerable<Note> Notes, int Total)> GetByUserIdAsync(Guid userId, NotesQueryParams queryParams)
     {
-        using var connection = _connectionFactory.CreateConnection();
+        var query = _dbContext.Notes
+            .AsNoTracking()
+            .Where(n => n.UserId == userId);
 
-        // Build the WHERE clause
-        var whereClause = "WHERE UserId = @UserId";
-        var parameters = new DynamicParameters();
-        parameters.Add("UserId", userId);
-
+        // Apply search filter
         if (!string.IsNullOrWhiteSpace(queryParams.Search))
         {
-            whereClause += " AND (Title LIKE @Search OR Content LIKE @Search)";
-            parameters.Add("Search", $"%{queryParams.Search}%");
+            var searchTerm = queryParams.Search.ToLower();
+            query = query.Where(n =>
+                n.Title.ToLower().Contains(searchTerm) ||
+                n.Content.ToLower().Contains(searchTerm));
         }
 
-        // Build ORDER BY clause (accept both camelCase and snake_case)
-        var orderColumn = queryParams.SortBy.ToLower() switch
+        // Get total count before pagination
+        var total = await query.CountAsync();
+
+        // Apply sorting
+        query = queryParams.SortBy.ToLower() switch
         {
-            "title" => "Title",
-            "updated_at" or "updatedat" => "UpdatedAt",
-            "created_at" or "createdat" => "CreatedAt",
-            _ => "CreatedAt"
+            "title" => queryParams.SortOrder.ToLower() == "asc"
+                ? query.OrderBy(n => n.Title)
+                : query.OrderByDescending(n => n.Title),
+            "updated_at" or "updatedat" => queryParams.SortOrder.ToLower() == "asc"
+                ? query.OrderBy(n => n.UpdatedAt)
+                : query.OrderByDescending(n => n.UpdatedAt),
+            "created_at" or "createdat" or _ => queryParams.SortOrder.ToLower() == "asc"
+                ? query.OrderBy(n => n.CreatedAt)
+                : query.OrderByDescending(n => n.CreatedAt)
         };
-        var orderDirection = queryParams.SortOrder.ToLower() == "asc" ? "ASC" : "DESC";
 
-        // Get total count
-        var countSql = $"SELECT COUNT(*) FROM Notes {whereClause}";
-        var total = await connection.ExecuteScalarAsync<int>(countSql, parameters);
-
-        // Get paginated data
+        // Apply pagination
         var offset = (queryParams.Page - 1) * queryParams.Limit;
-        parameters.Add("Offset", offset);
-        parameters.Add("Limit", queryParams.Limit);
-
-        var dataSql = $@"
-            SELECT Id, UserId, Title, Content, CreatedAt, UpdatedAt
-            FROM Notes
-            {whereClause}
-            ORDER BY {orderColumn} {orderDirection}
-            OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
-
-        var notes = await connection.QueryAsync<Note>(dataSql, parameters);
+        var notes = await query
+            .Skip(offset)
+            .Take(queryParams.Limit)
+            .ToListAsync();
 
         return (notes, total);
     }
 
     public async Task<Note> CreateAsync(Note note)
     {
-        using var connection = _connectionFactory.CreateConnection();
-
-        var sql = @"
-            INSERT INTO Notes (Id, UserId, Title, Content, CreatedAt, UpdatedAt)
-            OUTPUT INSERTED.Id, INSERTED.UserId, INSERTED.Title, INSERTED.Content, INSERTED.CreatedAt, INSERTED.UpdatedAt
-            VALUES (@Id, @UserId, @Title, @Content, @CreatedAt, @UpdatedAt)";
-
         note.Id = Guid.NewGuid();
         note.CreatedAt = DateTime.UtcNow;
         note.UpdatedAt = DateTime.UtcNow;
 
-        return await connection.QuerySingleAsync<Note>(sql, note);
+        _dbContext.Notes.Add(note);
+        await _dbContext.SaveChangesAsync();
+
+        return note;
     }
 
     public async Task<Note> UpdateAsync(Note note)
     {
-        using var connection = _connectionFactory.CreateConnection();
+        var entity = await _dbContext.Notes
+            .FirstOrDefaultAsync(n => n.Id == note.Id && n.UserId == note.UserId);
 
-        var sql = @"
-            UPDATE Notes
-            SET Title = @Title, Content = @Content, UpdatedAt = @UpdatedAt
-            OUTPUT INSERTED.Id, INSERTED.UserId, INSERTED.Title, INSERTED.Content, INSERTED.CreatedAt, INSERTED.UpdatedAt
-            WHERE Id = @Id AND UserId = @UserId";
+        if (entity == null)
+        {
+            throw new InvalidOperationException($"Note with Id {note.Id} not found");
+        }
 
-        note.UpdatedAt = DateTime.UtcNow;
+        entity.Title = note.Title;
+        entity.Content = note.Content;
+        entity.UpdatedAt = DateTime.UtcNow;
 
-        return await connection.QuerySingleAsync<Note>(sql, note);
+        await _dbContext.SaveChangesAsync();
+
+        return entity;
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        using var connection = _connectionFactory.CreateConnection();
-        await connection.ExecuteAsync("DELETE FROM Notes WHERE Id = @Id", new { Id = id });
+        var entity = await _dbContext.Notes.FindAsync(id);
+        if (entity != null)
+        {
+            _dbContext.Notes.Remove(entity);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 
     public async Task<bool> BelongsToUserAsync(Guid noteId, Guid userId)
     {
-        using var connection = _connectionFactory.CreateConnection();
-        return await connection.ExecuteScalarAsync<bool>(
-            "SELECT CASE WHEN EXISTS (SELECT 1 FROM Notes WHERE Id = @Id AND UserId = @UserId) THEN 1 ELSE 0 END",
-            new { Id = noteId, UserId = userId });
+        return await _dbContext.Notes
+            .AsNoTracking()
+            .AnyAsync(n => n.Id == noteId && n.UserId == userId);
     }
 }
