@@ -59,3 +59,9 @@ logs/
 # Database
 *.mdf
 *.ldf
+
+# Claude / Specify
+.claude/
+.specify/
+specs/
+CLAUDE.md
