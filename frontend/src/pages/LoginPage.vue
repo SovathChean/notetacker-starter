@@ -6,7 +6,7 @@ import { useAuth } from '@/composables/useAuth'
 const { login, isLoading, error } = useAuth()
 
 const form = ref({
-  email: '',
+  identifier: '',
   password: ''
 })
 
@@ -15,10 +15,8 @@ const validationErrors = ref<Record<string, string>>({})
 const validateForm = (): boolean => {
   validationErrors.value = {}
 
-  if (!form.value.email) {
-    validationErrors.value.email = 'Email is required'
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    validationErrors.value.email = 'Please enter a valid email'
+  if (!form.value.identifier) {
+    validationErrors.value.identifier = 'Email or username is required'
   }
 
   if (!form.value.password) {
@@ -29,7 +27,7 @@ const validateForm = (): boolean => {
 }
 
 const isFormValid = computed(() => {
-  return form.value.email && form.value.password
+  return form.value.identifier && form.value.password
 })
 
 const handleSubmit = async () => {
@@ -37,7 +35,7 @@ const handleSubmit = async () => {
 
   try {
     await login({
-      email: form.value.email,
+      identifier: form.value.identifier,
       password: form.value.password
     })
   } catch {
@@ -67,18 +65,18 @@ const handleSubmit = async () => {
 
         <div class="space-y-4">
           <div>
-            <label for="email" class="label">Email address</label>
+            <label for="identifier" class="label">Email or Username</label>
             <input
-              id="email"
-              v-model="form.email"
-              type="email"
-              autocomplete="email"
+              id="identifier"
+              v-model="form.identifier"
+              type="text"
+              autocomplete="username"
               required
               class="input"
-              :class="{ 'input-error': validationErrors.email }"
-              placeholder="you@example.com"
+              :class="{ 'input-error': validationErrors.identifier }"
+              placeholder="Email or username"
             />
-            <p v-if="validationErrors.email" class="error-message">{{ validationErrors.email }}</p>
+            <p v-if="validationErrors.identifier" class="error-message">{{ validationErrors.identifier }}</p>
           </div>
 
           <div>

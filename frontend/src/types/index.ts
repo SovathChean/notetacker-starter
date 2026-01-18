@@ -29,7 +29,7 @@ export interface UpdateNoteRequest {
 
 // Auth types
 export interface LoginRequest {
-  email: string
+  identifier: string
   password: string
 }
 

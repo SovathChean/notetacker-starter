@@ -21,7 +21,7 @@ public class ApplicationDbContext : DbContext
         // User configuration
         modelBuilder.Entity<User>(entity =>
         {
-            entity.ToTable("Users");
+            entity.ToTable("Users", t => t.HasTrigger("TR_Users_UpdatedAt"));
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Email).HasMaxLength(256).IsRequired();
             entity.Property(e => e.Username).HasMaxLength(100).IsRequired();
@@ -33,7 +33,7 @@ public class ApplicationDbContext : DbContext
         // Note configuration
         modelBuilder.Entity<Note>(entity =>
         {
-            entity.ToTable("Notes");
+            entity.ToTable("Notes", t => t.HasTrigger("TR_Notes_UpdatedAt"));
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Title).HasMaxLength(200).IsRequired();
             entity.Property(e => e.Content).HasMaxLength(50000);
