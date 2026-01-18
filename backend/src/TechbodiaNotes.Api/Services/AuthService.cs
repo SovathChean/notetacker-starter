@@ -53,11 +53,22 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email.ToLower());
+        var identifier = request.Identifier.Trim().ToLower();
+
+        // Determine if identifier is email or username
+        User? user;
+        if (identifier.Contains('@'))
+        {
+            user = await _userRepository.GetByEmailAsync(identifier);
+        }
+        else
+        {
+            user = await _userRepository.GetByUsernameAsync(identifier);
+        }
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
-            throw new UnauthorizedAccessException("Invalid email or password");
+            throw new UnauthorizedAccessException("Invalid email/username or password");
         }
 
         return await GenerateAuthResponse(user);

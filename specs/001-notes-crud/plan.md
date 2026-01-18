@@ -171,10 +171,12 @@ frontend/
 └── package.json
 
 database/
-└── migrations/
-    ├── 001_create_users_table.sql
-    ├── 002_create_refresh_tokens_table.sql
-    └── 003_create_notes_table.sql
+├── migrations/
+│   ├── 001_create_users_table.sql
+│   ├── 002_create_refresh_tokens_table.sql
+│   ├── 003_create_notes_table.sql
+│   └── NNN_future_migration.sql    # Future migrations follow this pattern
+└── docker-init.sql                  # Reference only (EF Core handles init now)
 ```
 
 **Structure Decision**: Web application structure with separate `frontend/` and `backend/` directories.

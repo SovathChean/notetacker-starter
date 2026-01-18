@@ -1,0 +1,637 @@
+{
+	"info": {
+		"_postman_id": "techbodia-notes-api",
+		"name": "TechbodiaNotes API",
+		"description": "Comprehensive Postman collection for testing TechbodiaNotes API endpoints with automatic token management.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5001",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "note_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "test_email",
+			"value": "test@example.com",
+			"type": "string"
+		},
+		{
+			"key": "test_username",
+			"value": "testuser",
+			"type": "string"
+		},
+		{
+			"key": "test_password",
+			"value": "SecurePass123!",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health"]
+						},
+						"description": "Check if the API is running and healthy."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Health check returns 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response indicates healthy status', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.be.oneOf(['Healthy', 'healthy', 'ok', 'OK']);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			],
+			"description": "Health check endpoints for monitoring API status."
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\",\n    \"username\": \"{{test_username}}\",\n    \"password\": \"{{test_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register"]
+						},
+						"description": "Register a new user account."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Registration successful', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response contains tokens', function () {",
+									"    const jsonData = pm.response.json();",
+									"    ",
+									"    if (jsonData.accessToken || jsonData.access_token || jsonData.token) {",
+									"        const accessToken = jsonData.accessToken || jsonData.access_token || jsonData.token;",
+									"        pm.collectionVariables.set('access_token', accessToken);",
+									"        console.log('Access token saved');",
+									"    }",
+									"    ",
+									"    if (jsonData.refreshToken || jsonData.refresh_token) {",
+									"        const refreshToken = jsonData.refreshToken || jsonData.refresh_token;",
+									"        pm.collectionVariables.set('refresh_token', refreshToken);",
+									"        console.log('Refresh token saved');",
+									"    }",
+									"    ",
+									"    if (jsonData.user && jsonData.user.id) {",
+									"        pm.collectionVariables.set('user_id', jsonData.user.id);",
+									"        console.log('User ID saved:', jsonData.user.id);",
+									"    } else if (jsonData.userId || jsonData.user_id) {",
+									"        pm.collectionVariables.set('user_id', jsonData.userId || jsonData.user_id);",
+									"        console.log('User ID saved');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"{{test_email}}\",\n    \"password\": \"{{test_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "Login with existing credentials to obtain access and refresh tokens."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains tokens and saves them', function () {",
+									"    const jsonData = pm.response.json();",
+									"    ",
+									"    if (jsonData.accessToken || jsonData.access_token || jsonData.token) {",
+									"        const accessToken = jsonData.accessToken || jsonData.access_token || jsonData.token;",
+									"        pm.collectionVariables.set('access_token', accessToken);",
+									"        pm.expect(accessToken).to.be.a('string').and.not.empty;",
+									"        console.log('Access token saved');",
+									"    }",
+									"    ",
+									"    if (jsonData.refreshToken || jsonData.refresh_token) {",
+									"        const refreshToken = jsonData.refreshToken || jsonData.refresh_token;",
+									"        pm.collectionVariables.set('refresh_token', refreshToken);",
+									"        pm.expect(refreshToken).to.be.a('string').and.not.empty;",
+									"        console.log('Refresh token saved');",
+									"    }",
+									"    ",
+									"    if (jsonData.user && jsonData.user.id) {",
+									"        pm.collectionVariables.set('user_id', jsonData.user.id);",
+									"        console.log('User ID saved:', jsonData.user.id);",
+									"    } else if (jsonData.userId || jsonData.user_id) {",
+									"        pm.collectionVariables.set('user_id', jsonData.userId || jsonData.user_id);",
+									"        console.log('User ID saved');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/refresh",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "refresh"]
+						},
+						"description": "Refresh the access token using the refresh token."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Token refresh successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('New tokens saved', function () {",
+									"    const jsonData = pm.response.json();",
+									"    ",
+									"    if (jsonData.accessToken || jsonData.access_token || jsonData.token) {",
+									"        const accessToken = jsonData.accessToken || jsonData.access_token || jsonData.token;",
+									"        pm.collectionVariables.set('access_token', accessToken);",
+									"        pm.expect(accessToken).to.be.a('string').and.not.empty;",
+									"        console.log('New access token saved');",
+									"    }",
+									"    ",
+									"    if (jsonData.refreshToken || jsonData.refresh_token) {",
+									"        const refreshToken = jsonData.refreshToken || jsonData.refresh_token;",
+									"        pm.collectionVariables.set('refresh_token', refreshToken);",
+									"        pm.expect(refreshToken).to.be.a('string').and.not.empty;",
+									"        console.log('New refresh token saved');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "me"]
+						},
+						"description": "Get the current authenticated user's profile information."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get current user successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains user data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id').or.to.have.property('email');",
+									"    ",
+									"    if (jsonData.id) {",
+									"        pm.collectionVariables.set('user_id', jsonData.id);",
+									"        console.log('User ID updated:', jsonData.id);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "logout"]
+						},
+						"description": "Logout the current user and invalidate their tokens."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Logout successful', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});",
+									"",
+									"// Optionally clear tokens after logout",
+									"// pm.collectionVariables.set('access_token', '');",
+									"// pm.collectionVariables.set('refresh_token', '');",
+									"console.log('User logged out successfully');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			],
+			"description": "Authentication endpoints for user registration, login, token refresh, and logout."
+		},
+		{
+			"name": "Notes",
+			"item": [
+				{
+					"name": "Create Note",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"My Test Note\",\n    \"content\": \"This is the content of my test note. It can contain any text.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/notes",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notes"]
+						},
+						"description": "Create a new note for the authenticated user."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Note created successfully', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+									"});",
+									"",
+									"pm.test('Response contains note data and saves ID', function () {",
+									"    const jsonData = pm.response.json();",
+									"    ",
+									"    if (jsonData.id) {",
+									"        pm.collectionVariables.set('note_id', jsonData.id);",
+									"        console.log('Note ID saved:', jsonData.id);",
+									"    } else if (jsonData.noteId || jsonData.note_id) {",
+									"        const noteId = jsonData.noteId || jsonData.note_id;",
+									"        pm.collectionVariables.set('note_id', noteId);",
+									"        console.log('Note ID saved:', noteId);",
+									"    } else if (jsonData.data && jsonData.data.id) {",
+									"        pm.collectionVariables.set('note_id', jsonData.data.id);",
+									"        console.log('Note ID saved:', jsonData.data.id);",
+									"    }",
+									"    ",
+									"    pm.expect(jsonData).to.have.property('title').or.to.have.property('id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get All Notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/notes",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notes"]
+						},
+						"description": "Get all notes for the authenticated user."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get all notes successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response is an array or contains notes array', function () {",
+									"    const jsonData = pm.response.json();",
+									"    ",
+									"    if (Array.isArray(jsonData)) {",
+									"        console.log('Number of notes:', jsonData.length);",
+									"        if (jsonData.length > 0 && jsonData[0].id) {",
+									"            pm.collectionVariables.set('note_id', jsonData[0].id);",
+									"            console.log('First note ID saved:', jsonData[0].id);",
+									"        }",
+									"    } else if (jsonData.data && Array.isArray(jsonData.data)) {",
+									"        console.log('Number of notes:', jsonData.data.length);",
+									"        if (jsonData.data.length > 0 && jsonData.data[0].id) {",
+									"            pm.collectionVariables.set('note_id', jsonData.data[0].id);",
+									"            console.log('First note ID saved:', jsonData.data[0].id);",
+									"        }",
+									"    } else if (jsonData.notes && Array.isArray(jsonData.notes)) {",
+									"        console.log('Number of notes:', jsonData.notes.length);",
+									"        if (jsonData.notes.length > 0 && jsonData.notes[0].id) {",
+									"            pm.collectionVariables.set('note_id', jsonData.notes[0].id);",
+									"            console.log('First note ID saved:', jsonData.notes[0].id);",
+									"        }",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Note by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/notes/{{note_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notes", "{{note_id}}"]
+						},
+						"description": "Get a specific note by its ID."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Get note by ID successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains note data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    const noteData = jsonData.data || jsonData;",
+									"    ",
+									"    pm.expect(noteData).to.have.property('id').or.to.have.property('title');",
+									"    console.log('Note title:', noteData.title);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Update Note",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Note Title\",\n    \"content\": \"This is the updated content of the note.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/notes/{{note_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notes", "{{note_id}}"]
+						},
+						"description": "Update an existing note by its ID."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Update note successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Response contains updated note data', function () {",
+									"    const jsonData = pm.response.json();",
+									"    const noteData = jsonData.data || jsonData;",
+									"    ",
+									"    pm.expect(noteData).to.have.property('title');",
+									"    console.log('Updated note title:', noteData.title);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Delete Note",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/notes/{{note_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "notes", "{{note_id}}"]
+						},
+						"description": "Delete a note by its ID."
+					},
+					"response": [],
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Delete note successful', function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+									"});",
+									"",
+									"console.log('Note deleted successfully');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			],
+			"description": "CRUD operations for managing user notes."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Collection-level pre-request script",
+					"// This runs before every request in the collection",
+					"",
+					"// Log current token status for debugging",
+					"const token = pm.collectionVariables.get('access_token');",
+					"if (token) {",
+					"    console.log('Using access token (first 20 chars):', token.substring(0, 20) + '...');",
+					"} else {",
+					"    console.log('No access token set - make sure to login first for authenticated requests');",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Collection-level test script",
+					"// This runs after every request in the collection",
+					"",
+					"// Log response time",
+					"console.log('Response time:', pm.response.responseTime + 'ms');",
+					"",
+					"// Check for common error patterns",
+					"if (pm.response.code === 401) {",
+					"    console.warn('Unauthorized - you may need to login again');",
+					"}",
+					"",
+					"if (pm.response.code === 403) {",
+					"    console.warn('Forbidden - you may not have permission for this action');",
+					"}",
+					"",
+					"if (pm.response.code >= 500) {",
+					"    console.error('Server error occurred');",
+					"}"
+				]
+			}
+		}
+	]
+}

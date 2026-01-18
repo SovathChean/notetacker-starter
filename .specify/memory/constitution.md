@@ -97,6 +97,13 @@ This section defines the technology stack and coding standards for the project.
 - SQL Server database
 - Dependency injection for all services
 
+**Database Migrations**:
+- SQL scripts stored in `database/migrations/` folder
+- Naming convention: `NNN_description.sql` (e.g., `001_create_users_table.sql`)
+- EF Core migrations for auto-applying at app startup
+- Both must be kept in sync for schema changes
+- **Naming**: PascalCase for tables and columns (SQL Server/.NET convention)
+
 **Code Style**:
 - Frontend: ESLint + Prettier with Vue recommended rules
 - Backend: .NET code style conventions with nullable enabled

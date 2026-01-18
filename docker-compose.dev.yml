@@ -1,0 +1,16 @@
+# Development setup with hot-reload for frontend
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./frontend/src:/app/src:delegated
+      - ./frontend/index.html:/app/index.html:delegated
+      - ./frontend/public:/app/public:delegated
+    ports:
+      - "7002:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5001

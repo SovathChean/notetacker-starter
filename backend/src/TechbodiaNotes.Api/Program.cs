@@ -66,6 +66,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
                 "http://localhost:5173",
+                "http://localhost:7001",
+                "http://localhost:7002",
                 "http://localhost:80",
                 "http://localhost",
                 "http://frontend:80",
@@ -82,12 +84,8 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Apply pending migrations automatically
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
-}
+// Database is managed by SQL scripts in docker-init.sql
+// EF migrations are skipped to avoid conflicts with existing tables
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
