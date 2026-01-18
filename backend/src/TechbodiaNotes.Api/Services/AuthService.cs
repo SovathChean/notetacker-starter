@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using TechbodiaNotes.Api.DTOs.Auth;
 using TechbodiaNotes.Api.Models;
 using TechbodiaNotes.Api.Repositories;
@@ -8,17 +9,20 @@ public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IRevokedTokenRepository _revokedTokenRepository;
     private readonly ITokenService _tokenService;
     private readonly IConfiguration _configuration;
 
     public AuthService(
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
+        IRevokedTokenRepository revokedTokenRepository,
         ITokenService tokenService,
         IConfiguration configuration)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
+        _revokedTokenRepository = revokedTokenRepository;
         _tokenService = tokenService;
         _configuration = configuration;
     }
@@ -112,14 +116,51 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task LogoutAsync(string refreshToken)
+    public async Task LogoutAsync(string refreshToken, string accessToken)
     {
+        // Revoke refresh token
         var storedToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
 
         if (storedToken != null && storedToken.IsActive)
         {
             await _refreshTokenRepository.RevokeAsync(refreshToken);
         }
+
+        // Revoke access token by adding its JTI to the blacklist
+        if (!string.IsNullOrEmpty(accessToken))
+        {
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.ReadJwtToken(accessToken);
+                var jti = token.Claims.FirstOrDefault(c => c.Type == "jti")?.Value;
+                var exp = token.ValidTo;
+                var userId = token.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+
+                if (!string.IsNullOrEmpty(jti) && Guid.TryParse(userId, out var userGuid))
+                {
+                    var revokedToken = new RevokedToken
+                    {
+                        Id = Guid.NewGuid(),
+                        Jti = jti,
+                        UserId = userGuid,
+                        ExpiresAt = exp,
+                        RevokedAt = DateTime.UtcNow
+                    };
+
+                    await _revokedTokenRepository.RevokeTokenAsync(revokedToken);
+                }
+            }
+            catch
+            {
+                // If token parsing fails, ignore - the refresh token is already revoked
+            }
+        }
+    }
+
+    public async Task<bool> IsTokenRevokedAsync(string jti)
+    {
+        return await _revokedTokenRepository.IsTokenRevokedAsync(jti);
     }
 
     public async Task<UserDto?> GetCurrentUserAsync(Guid userId)

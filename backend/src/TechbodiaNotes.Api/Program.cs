@@ -26,6 +26,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Register Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IRevokedTokenRepository, RevokedTokenRepository>();
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
 
 // Register Services
@@ -54,6 +55,20 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
         ClockSkew = TimeSpan.Zero
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var authService = context.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+            var jti = context.Principal?.FindFirst("jti")?.Value;
+
+            if (!string.IsNullOrEmpty(jti) && await authService.IsTokenRevokedAsync(jti))
+            {
+                context.Fail("Token has been revoked");
+            }
+        }
     };
 });
 

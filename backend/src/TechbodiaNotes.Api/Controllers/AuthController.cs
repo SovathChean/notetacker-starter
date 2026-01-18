@@ -73,7 +73,11 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
     {
-        await _authService.LogoutAsync(request.RefreshToken);
+        // Extract access token from Authorization header
+        var accessToken = HttpContext.Request.Headers["Authorization"]
+            .FirstOrDefault()?.Replace("Bearer ", "");
+
+        await _authService.LogoutAsync(request.RefreshToken, accessToken ?? string.Empty);
         return NoContent();
     }
 
