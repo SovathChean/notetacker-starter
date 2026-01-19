@@ -141,5 +141,31 @@ BEGIN
 END
 GO
 
+-- Migration: 004_create_revoked_tokens_table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'RevokedTokens')
+BEGIN
+    CREATE TABLE RevokedTokens (
+        Id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        Jti NVARCHAR(100) NOT NULL,
+        UserId UNIQUEIDENTIFIER NOT NULL,
+        ExpiresAt DATETIME2 NOT NULL,
+        RevokedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        CONSTRAINT FK_RevokedTokens_Users FOREIGN KEY (UserId)
+            REFERENCES Users(Id) ON DELETE CASCADE,
+        CONSTRAINT UQ_RevokedTokens_Jti UNIQUE (Jti)
+    );
+
+    CREATE INDEX IX_RevokedTokens_Jti ON RevokedTokens(Jti);
+    CREATE INDEX IX_RevokedTokens_ExpiresAt ON RevokedTokens(ExpiresAt);
+    CREATE INDEX IX_RevokedTokens_UserId ON RevokedTokens(UserId);
+
+    PRINT 'Table RevokedTokens created successfully.';
+END
+ELSE
+BEGIN
+    PRINT 'Table RevokedTokens already exists.';
+END
+GO
+
 PRINT 'Database initialization completed successfully!';
 GO
