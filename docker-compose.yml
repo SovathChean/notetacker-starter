@@ -22,7 +22,7 @@ services:
 
   # Database Initialization Service
   db-init:
-    image: mcr.microsoft.com/mssql-tools18
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: techbodia-notes-db-init
     depends_on:
       database:
