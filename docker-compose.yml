@@ -20,6 +20,25 @@ services:
     networks:
       - techbodia-network
 
+  # Database Initialization Service
+  db-init:
+    image: mcr.microsoft.com/mssql-tools18
+    container_name: techbodia-notes-db-init
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - ./database:/scripts
+    command: >
+      bash -c "
+      echo 'Waiting for SQL Server to be ready...' &&
+      sleep 5 &&
+      /opt/mssql-tools18/bin/sqlcmd -S database -U sa -P 'YourStrong@Passw0rd' -C -i /scripts/docker-init.sql &&
+      echo 'Database initialization completed!'
+      "
+    networks:
+      - techbodia-network
+
   # Backend API (EF Core migrations run automatically on startup)
   backend:
     build:
@@ -37,8 +56,8 @@ services:
     ports:
       - "5001:5000"
     depends_on:
-      database:
-        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
       interval: 30s
@@ -59,12 +78,21 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.techbodianote.rule=Host(`techbodia-notes.komror.com`)"
+      - "traefik.http.routers.techbodianote.tls=true"
+      - "traefik.http.routers.techbodianote.tls.certresolver=letsencrypt"
+      - "traefik.http.services.techbodianote.loadbalancer.server.port=80"
     networks:
       - techbodia-network
+      - myapp
 
 networks:
   techbodia-network:
     driver: bridge
+  myapp:
+    external: true
 
 volumes:
   sqlserver_data:
