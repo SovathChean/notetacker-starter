@@ -137,7 +137,7 @@ const handleClose = () => {
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
               <button
                 type="submit"
-                :disabled="isLoading || !isFormValid"
+                :disabled="isLoading"
                 class="btn-primary w-full sm:w-auto"
               >
                 <span v-if="isLoading" class="flex items-center justify-center">
