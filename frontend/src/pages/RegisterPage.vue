@@ -59,6 +59,31 @@ const isFormValid = computed(() => {
   )
 })
 
+const passwordStrength = computed(() => {
+  const password = form.value.password
+  if (!password) return { level: 0, text: '', color: '' }
+
+  let score = 0
+  if (password.length >= 8) score++
+  if (password.length >= 12) score++
+  if (/[A-Z]/.test(password)) score++
+  if (/[a-z]/.test(password)) score++
+  if (/[0-9]/.test(password)) score++
+  if (/[^A-Za-z0-9]/.test(password)) score++
+
+  if (score <= 2) return { level: 1, text: 'Weak', color: 'red' }
+  if (score <= 4) return { level: 2, text: 'Medium', color: 'yellow' }
+  return { level: 3, text: 'Strong', color: 'green' }
+})
+
+const confirmPasswordError = computed(() => {
+  if (!form.value.confirmPassword) return ''
+  if (form.value.password !== form.value.confirmPassword) {
+    return 'Passwords do not match'
+  }
+  return ''
+})
+
 const handleSubmit = async () => {
   if (!validateForm()) return
 
@@ -137,6 +162,34 @@ const handleSubmit = async () => {
               placeholder="At least 8 characters"
             />
             <p v-if="validationErrors.password" class="error-message">{{ validationErrors.password }}</p>
+            <div v-if="form.password" class="mt-2">
+              <div class="flex items-center gap-2">
+                <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    class="h-full transition-all duration-300"
+                    :class="{
+                      'bg-red-500': passwordStrength.color === 'red',
+                      'bg-yellow-500': passwordStrength.color === 'yellow',
+                      'bg-green-500': passwordStrength.color === 'green'
+                    }"
+                    :style="{ width: `${(passwordStrength.level / 3) * 100}%` }"
+                  ></div>
+                </div>
+                <span
+                  class="text-sm font-medium"
+                  :class="{
+                    'text-red-500': passwordStrength.color === 'red',
+                    'text-yellow-500': passwordStrength.color === 'yellow',
+                    'text-green-500': passwordStrength.color === 'green'
+                  }"
+                >
+                  {{ passwordStrength.text }}
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">
+                Use 8+ characters with uppercase, lowercase, numbers & symbols
+              </p>
+            </div>
           </div>
 
           <div>
@@ -148,17 +201,18 @@ const handleSubmit = async () => {
               autocomplete="new-password"
               required
               class="input"
-              :class="{ 'input-error': validationErrors.confirmPassword }"
+              :class="{ 'input-error': validationErrors.confirmPassword || confirmPasswordError }"
               placeholder="Confirm your password"
             />
-            <p v-if="validationErrors.confirmPassword" class="error-message">{{ validationErrors.confirmPassword }}</p>
+            <p v-if="confirmPasswordError" class="error-message">{{ confirmPasswordError }}</p>
+            <p v-else-if="validationErrors.confirmPassword" class="error-message">{{ validationErrors.confirmPassword }}</p>
           </div>
         </div>
 
         <div>
           <button
             type="submit"
-            :disabled="isLoading || !isFormValid"
+            :disabled="isLoading"
             class="btn-primary w-full flex justify-center py-3"
           >
             <span v-if="isLoading" class="flex items-center">
